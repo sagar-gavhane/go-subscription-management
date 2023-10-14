@@ -2,6 +2,8 @@
 
 Thread: https://chat.openai.com/share/8ab84a92-2c57-4b7e-8dcf-bb3ed6be82b1
 
+API Documentation: https://documenter.getpostman.com/view/4725892/2s9YR58Fcx
+
 _Objective_: To provide users with the ability to manage their subscription plans, billing information, and access to premium features.
 
 **1. Subscription Plans Management:**
