@@ -5,21 +5,33 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"strconv"
 
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/sagar-gavhane/go-subscription-management/internal/handlers"
 )
 
-const (
-	host     = "localhost"
-	port     = 5432
-	user     = "sagar"
-	password = "Sagar@123"
-	dbname   = "subscription_mgmt_db"
-)
-
 func main() {
+	err := godotenv.Load()
+
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	host := os.Getenv("POSTGRESQL_HOST")
+	user := os.Getenv("POSTGRESQL_USER")
+	password := os.Getenv("POSTGRESQL_PASSWORD")
+	dbname := os.Getenv("POSTGRESQL_DBNAME")
+
+	port, err := strconv.Atoi(os.Getenv("POSTGRESQL_PORT"))
+
+	if err != nil {
+		log.Fatal(fmt.Sprintf("Failed to parse port number %v", port))
+	}
+
 	connStr := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
 
 	db, err := sql.Open("postgres", connStr)
@@ -29,6 +41,8 @@ func main() {
 	}
 
 	defer db.Close()
+
+	log.Println("Database connected successfully.")
 
 	router := mux.NewRouter()
 
@@ -42,9 +56,11 @@ func main() {
 	router.HandleFunc("/api/plans/{planId}/deactivate", _handlers.DeactivatePlanById).Methods("POST")
 	router.HandleFunc("/", _handlers.Index)
 
-	fmt.Println("application started on :3000")
+	port, err = strconv.Atoi(os.Getenv("PORT"))
 
-	err = http.ListenAndServe(":3000", router)
+	log.Printf("Application started on :%v", port)
+
+	err = http.ListenAndServe(fmt.Sprintf(":%v", port), router)
 
 	if err != nil {
 		log.Fatal("failed to start server", err)

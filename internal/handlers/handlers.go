@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -29,11 +30,14 @@ func (repo *Repo) Index(w http.ResponseWriter, r *http.Request) {
 }
 
 func (repo *Repo) CreatePlan(w http.ResponseWriter, r *http.Request) {
+	log.Println("handlers.CreatePlan executed")
 	var err error
 	services := services.NewRepo(repo.DB)
 	var plan types.Plan
 
 	err = json.NewDecoder(r.Body).Decode(&plan)
+
+	log.Printf("handlers.CreatePlan req.body %+v\n", plan)
 
 	if err != nil {
 		fmt.Println(err)
@@ -54,6 +58,8 @@ func (repo *Repo) CreatePlan(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Printf("handlers.CreatePlan plan inserted successfully and plan = %d\n", insertedId)
+
 	newPlan, err := services.GetPlanById(insertedId)
 
 	helpers.LogError(err)
@@ -65,9 +71,11 @@ func (repo *Repo) CreatePlan(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "application/json")
 	w.Write([]byte(string(jsonData)))
 	w.WriteHeader(http.StatusCreated)
+	log.Println("handler.CreatePlan end")
 }
 
 func (repo *Repo) GetPlans(w http.ResponseWriter, r *http.Request) {
+	log.Println("handlers.GetPlans executed")
 	services := services.NewRepo(repo.DB)
 
 	plans, err := services.GetPlans()
@@ -86,6 +94,7 @@ func (repo *Repo) GetPlans(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(string(jsonData)))
+	log.Println("handlers.GetPlans end")
 }
 
 func (repo *Repo) GetPlanById(w http.ResponseWriter, r *http.Request) {

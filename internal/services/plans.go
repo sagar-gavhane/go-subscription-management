@@ -18,6 +18,7 @@ func NewRepo(db *sql.DB) *Repo {
 }
 
 func (repo *Repo) GetPlans() ([]types.Plan, error) {
+	log.Println("services.GetPlans executed")
 	var plans []types.Plan
 
 	query := `select * from plans`
@@ -61,6 +62,9 @@ func (repo *Repo) GetPlans() ([]types.Plan, error) {
 		plans = append(plans, plan)
 	}
 
+	log.Printf("services.GetPlans %+v\n", plans)
+
+	log.Println("services.GetPlans end")
 	return plans, nil
 }
 
