@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 	"github.com/sagar-gavhane/go-subscription-management/internal/handlers"
 )
@@ -29,16 +30,21 @@ func main() {
 
 	defer db.Close()
 
-	mux := http.NewServeMux()
+	router := mux.NewRouter()
 
 	_handlers := handlers.NewRepo(db)
 
-	mux.HandleFunc("/api/plans", _handlers.PlansHandler)
-	mux.HandleFunc("/", _handlers.Index)
+	router.HandleFunc("/api/plans", _handlers.GetPlans).Methods("GET")
+	router.HandleFunc("/api/plans", _handlers.CreatePlan).Methods("POST")
+	router.HandleFunc("/api/plans/{planId}", _handlers.GetPlanById).Methods("GET")
+	router.HandleFunc("/api/plans/{planId}", _handlers.UpdatePlanById).Methods("PATCH")
+	router.HandleFunc("/api/plans/{planId}", _handlers.DeletePlanById).Methods("DELETE")
+	router.HandleFunc("/api/plans/{planId}/deactivate", _handlers.DeactivatePlanById).Methods("POST")
+	router.HandleFunc("/", _handlers.Index)
 
 	fmt.Println("application started on :3000")
 
-	err = http.ListenAndServe(":3000", mux)
+	err = http.ListenAndServe(":3000", router)
 
 	if err != nil {
 		log.Fatal("failed to start server", err)

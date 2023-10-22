@@ -115,6 +115,37 @@ func (repo *Repo) GetPlanById(planId int) (types.Plan, error) {
 	return plan, nil
 }
 
-// TODO: createPlans
-// TODO: updatePlansById
+func (repo *Repo) UpdatePlanById(planId int, plan types.Plan) (types.Plan, error) {
+	var updatedPlan types.Plan
+
+	query := `select * from plans where plans.id = $1`
+	rows, err := repo.DB.Query(query, planId)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for rows.Next() {
+		if err := rows.Scan(&updatedPlan.Id, &updatedPlan.Name, &updatedPlan.Description, &updatedPlan.Type, &updatedPlan.IconUrl, &updatedPlan.ReleaseDate, &updatedPlan.EndDate); err != nil {
+			log.Println(err)
+		}
+	}
+
+	updatedPlan.Name = plan.Name
+	updatedPlan.Description = plan.Description
+	updatedPlan.Type = plan.Type
+	updatedPlan.IconUrl = plan.IconUrl
+	updatedPlan.EndDate = plan.EndDate
+	updatedPlan.ReleaseDate = plan.ReleaseDate
+
+	query = `update table plans set name=?, description=?, type=?, iconUrl=?, endDate=?, releaseDate=? where id = ?`
+	_, err = repo.DB.Exec(query, updatedPlan.Name, updatedPlan.Description, updatedPlan.Type, updatedPlan.IconUrl, updatedPlan.EndDate, updatedPlan.ReleaseDate, planId)
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	return updatedPlan, nil
+}
+
 // TODO: deletePlansById
